@@ -61,10 +61,19 @@ app.post("/urls", (req, res) => {
     } else {
       const modifiedURL = `http://${longURL}`;
       urlDatabase[shortURL] = modifiedURL
-    } 
+    }  
   console.log('urlDatabase', urlDatabase);// Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
 });
+
+app.post("/urls/:id/delete", (req, res) => {
+  console.log(req.params.id)
+  const id = req.params.id
+  delete urlDatabase[id]
+  console.log(urlDatabase[id])
+  res.redirect("/urls")
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
