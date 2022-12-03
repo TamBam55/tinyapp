@@ -66,14 +66,20 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  console.log(req.params.id)
-  const id = req.params.id
-  delete urlDatabase[id]
-  console.log(urlDatabase[id])
-  res.redirect("/urls")
+app.post("/urls/:id/edit", (req, res) => {
+  console.log('request body', req.body["longURL"]);
+  urlDatabase[req.params.id] = req.body.longURL
+  res.redirect("/urls");
 });
 
+
+app.post("/urls/:id/delete", (req, res) => {
+  console.log(req.params.id);
+  const id = req.params.id;
+  delete urlDatabase[id];
+  console.log(urlDatabase[id]);
+  res.redirect("/urls");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
