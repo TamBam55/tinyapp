@@ -1,4 +1,6 @@
 const express = require("express");
+const morgan = require("morgan")
+const cookieParser = require(('cookie-parser'))
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -14,9 +16,23 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// const templateVars = {
+//   username: req.cookies["username"],
+//   // ... any other vars
+//   urls: urlDatabase
+//   shortURL: req.params.shortURL
+// };
+// res.render("urls_index", templateVars);
+
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(cookieParser());
+
+app.get('/login', (req, res) => (
+  res.render('login')
+))
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
@@ -64,6 +80,18 @@ app.post("/urls", (req, res) => {
     }  
   console.log('urlDatabase', urlDatabase);// Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
+});
+
+app.post('/login', (req, res) => {
+  let email = req.body.username
+  console.log('req.body', req.body);
+res.cookie("id", email);
+res.redirect("/urls");
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookies('username');
+  res.redirect('/urls');
 });
 
 app.post("/urls/:id/edit", (req, res) => {
