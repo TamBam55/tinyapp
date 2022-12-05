@@ -16,14 +16,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-// const templateVars = {
-//   username: req.cookies["username"],
-//   // ... any other vars
-//   urls: urlDatabase
-//   shortURL: req.params.shortURL
-// };
-// res.render("urls_index", templateVars);
-
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
@@ -35,7 +27,10 @@ app.get('/login', (req, res) => (
 ))
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -51,7 +46,11 @@ app.get("/u/:id", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    // ... any other vars
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -85,12 +84,12 @@ app.post("/urls", (req, res) => {
 app.post('/login', (req, res) => {
   let email = req.body.username
   console.log('req.body', req.body);
-res.cookie("id", email);
+res.cookie("username", email);
 res.redirect("/urls");
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookies('username');
+  res.clearCookie('username');
   res.redirect('/urls');
 });
 
