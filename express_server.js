@@ -5,7 +5,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const { v4: uuid } = require('uuid');
 const bcrypt = require("bcryptjs")
-
+// const hashedPassword = bcrypt.hashSync(password, 10);
 const cookieSession = require('cookie-session');
 // const helpers = require("./helpers");
 // const getUserByEmail = helpers.getUserByEmail;
@@ -53,12 +53,12 @@ const users = {
   abc: {
     id: 'abc',
     email: 'a@a.com',
-    password: '1235'
+    password: bcrypt.hashSync('1235', 10)
   },
   def: {
     id: 'def',
     email: 'tambam@mail.com',
-    password: '7895'
+    password: bcrypt.hashSync('7895', 10)
   }
 };
 
@@ -75,7 +75,10 @@ app.use(cookieSession({
 }))
 
 app.get("/register", (req, res) => {
-  res.render("registration", req.body);
+  const templateVars = {
+    user: null
+  }
+  res.render("registration", templateVars);
 });
 
 app.get('/login', (req, res) => {
@@ -92,7 +95,7 @@ app.get("/urls/new", (req, res) => {
     return res.status(404).send(`<h1>'You must be logged in to access this function'</h1><a href ="/login">Back to Login</a>`)
   }
   const templateVars = {
-    user: loggedInUser[req.cookies.user_id]
+    user: randomUserID[req.cookies.user_id]
   };
   res.render("urls_new", templateVars);
 });
@@ -182,11 +185,11 @@ app.post('/register', (req, res) => {
   const newUser = {
     id: newUserID,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, 10)
   };
   //add the new user into the global users object
   console.log('Before', users)
-  users[newUserID] = newUser
+  
   console.log('After', users) 
   // if email or password are empty, send back (400) response code
   if (newUser === '') {
@@ -196,6 +199,7 @@ app.post('/register', (req, res) => {
   if (newUser.users) {
     return res.render('registered');
   }
+  users[newUserID] = newUser
   //store only the user id into the session cookie
   res.cookie("user_id", newUserID);
   res.redirect("/urls")
@@ -204,10 +208,10 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const password = req.body.password;
   //using email find the user in global users object
-  templateVars = {
-    user: users[req.cookies.user_id]
-  };
-  
+  // templateVars = {
+  //   user: users[req.cookies.user_id]
+  // };
+  console.log(req.body)
   const user = getUserByEmail(req.body.email, users);
     if (!user) {
       //if no user found return (404)
@@ -218,13 +222,13 @@ app.post('/login', (req, res) => {
       return res.status(404).send("Password not found")
     }
     const user_id = user.id 
-
+    res.cookie("user_id", user_id);
     req.session.user_id = user_id;
     res.redirect("/urls");
   });
 
 app.post('/logout', (req, res) => {
-  req.session = null;
+  req.clearCookie = null;
   res.redirect('/login');
 });
 
