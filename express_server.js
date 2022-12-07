@@ -1,9 +1,11 @@
 const express = require("express");
-const morgan = require("morgan")
-const cookieParser = require(('cookie-parser'))
+const morgan = require("morgan");
+const cookieParser = require(('cookie-parser'));
+const cookiesession = require('cookie-session');
+const bodyparser = require('body-parser');
 const app = express();
 const PORT = 8080; // default port 8080
-
+// const bcryptjs = require('bcryptjs');
 const { v4: uuid } = require('uuid');
 
 function generateRandomString() {
@@ -16,25 +18,66 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const getUserByEmail = (email, database) => {
+  for (const userID in database)
+    if (database[id].email === email) {
+      return database[id];
+    }
+    return undefined;
+}
+
+
+const users = {
+  abc: {
+    id: 'abc',
+    email: 'a@a.com',
+    password: '1235'
+  },
+  def: {
+    id: 'def',
+    email: 'tambam@mail.com',
+    password: '7895'
+  }
+};
+
 app.set("view engine", "ejs");
 
+app.use
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser());
+// app.use(cookieSession ({
+//     name: 'session'
+//     keys: ['hello', 'myName', 'isTammy'],
+//   })
+// );
+
+app.get("/register", (req, res) => {
+  res.render("registration", req.body);
+});
 
 app.get('/login', (req, res) => (
   res.render('login')
 ))
 
 app.get("/urls/new", (req, res) => {
+  const randomUserID = req.cookies["user_id"] 
+  const loggedInUser = users[randomUserID]
   const templateVars = {
-    username: req.cookies["username"],
+    user: loggedInUser
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]}
+  const randomUserID = req.cookies["user_id"] 
+  const loggedInUser = users[randomUserID]
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    user: loggedInUser
+  };
   res.render("urls_show", templateVars)
 });
 
@@ -46,8 +89,12 @@ app.get("/u/:id", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
+  // const currentUserName = req.cookies["username"]
+  const randomUserID = req.cookies["user_id"] 
+  const loggedInUser = users[randomUserID]
   const templateVars = {
-    username: req.cookies["username"],
+    // username: currentUserName,
+    user: loggedInUser,
     // ... any other vars
     urls: urlDatabase
   };
@@ -81,15 +128,56 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
 });
 
+app.post('/register', (req, res) => {
+  console.log('req.body', req.body)
+  const newUserID = generateRandomString();
+  //create a new user object with id - email - password
+  const newUser = {
+    id: newUserID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  //add the new user into the global users object
+  console.log('Before', users)
+  users[newUserID] = newUser
+  console.log('After', users) 
+  // if email or password are empty, send back (400) response code
+  if (newUser === '') {
+    return res.status(404).send('Error 404: Email or Password missing')
+  }
+  // if email already exists in system, send back a (400) response
+  if (getUserByEmail) {
+    return res.render('registered');
+  }
+  //store only the user id into the session cookie
+  res.cookie("user_id", newUserID);
+  res.redirect("/urls")
+})
+
 app.post('/login', (req, res) => {
-  let email = req.body.username
-  console.log('req.body', req.body);
-res.cookie("username", email);
+  const email = req.body.email;
+  const password = req.body.password;
+  const templateVars = {
+    user: email,
+    urls: urlDatabase
+  }
+  
+  //using email find the user in global users object
+
+  //if no user found return (404)
+
+  //if user is found then check if req.body.password is === user.password
+
+  //if password fails return (404) 
+  
+  //if password passes 
+res.render('urls_index', templateVars)
+res.cookie("user_id", email);
 res.redirect("/urls");
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 

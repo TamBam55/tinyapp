@@ -17,18 +17,20 @@
         <a class="nav-item nav-link" href="/urls" style="font-family: Georgia">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new" style="font-family: Georgia">Create New URL</a>
         <a class="nav-item nav-link" href="/login" style="font-family: Georgia"></a>
+        <a class="nav-item nav-link" href="/register" style="font-family: Georgia"></a>
       </div>
     </div>
 
-    <% if (username) {%>
+    <% if (user) {%>
       <form class="form-inline" method="POST" action="/logout">
-        <a class="nav-item nav-link inline">Logged in as <%=username%></a>
+        <a class="nav-item nav-link inline">Logged in as <%=user.email%></a>
         <button type="submit" class="btn btn-outline-secondary">Logout</button>
       </form>
       <%} else {%>
 
     <form  method="POST" class="form-inline" action="/login">
-    <input type="text" name="username" placeholder="Username">
+    <input type="text" name="email" placeholder="email">
+    <input name="password" type="text" placeholder="Password"/>
     <input type="submit" value="Login">
     </form>
     <%}%>
