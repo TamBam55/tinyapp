@@ -1,31 +1,30 @@
 const express = require("express");
 const morgan = require("morgan")
-const cookieParser = require(('cookie-parser'))
+// const cookieParser = require(('cookie-parser'))
 const app = express();
 const PORT = 8080; // default port 8080
 const { v4: uuid } = require('uuid');
 const bcrypt = require("bcryptjs")
-// const hashedPassword = bcrypt.hashSync(password, 10);
 const cookieSession = require('cookie-session');
-// const helpers = require("./helpers");
-// const getUserByEmail = helpers.getUserByEmail;
-// const generateRandomString = helpers.generateRandomString;
-// const urlsForUser = helpers.urlsForUser;
+const helpers = require("./helpers");
+const getUserByEmail = helpers.getUserByEmail;
+const generateRandomString = helpers.generateRandomString;
+const urlsForUser = helpers.urlsForUser;
 
-function generateRandomString() {
-  let x = uuid();
-  return x.substring(0, 6);
-}
+// function generateRandomString() {
+//   let x = uuid();
+//   return x.substring(0, 6);
+// }
 
-const getUserByEmail = (email, users) => {
-  for (const userID in users) {
-    const user = users[userID];
-    if (email === user.email) {
-      return user;
-    }
-  }
-  return null;
-};
+// const getUserByEmail = (email, users) => {
+//   for (const userID in users) {
+//     const user = users[userID];
+//     if (email === user.email) {
+//       return user;
+//     }
+//   }
+//   return null;
+// };
 
 const urlsForUser = (id, urlDatabase) => {
   const userUrls = {};
@@ -62,13 +61,11 @@ const users = {
   }
 };
 
-
-
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(cookieSession({
   name: 'bangarang',
   keys: ["rufio"]
@@ -83,19 +80,19 @@ app.get("/register", (req, res) => {
 
 app.get('/login', (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id]
+    user: users[req.session.user_id]
   }
   res.render('login', templateVars)
 });
 
 app.get("/urls/new", (req, res) => {
-  const randomUserID = req.cookies["user_id"] 
+  const randomUserID = req.session["user_id"] 
   // const loggedInUser = users[randomUserID]
   if (!randomUserID) {
     return res.status(404).send(`<h1>'You must be logged in to access this function'</h1><a href ="/login">Back to Login</a>`)
   }
   const templateVars = {
-    user: randomUserID[req.cookies.user_id]
+    user: randomUserID[req.session.user_id]
   };
   res.render("urls_new", templateVars);
 });
@@ -133,7 +130,7 @@ app.get("/u/:id", (req, res) => {
 
 app.get("/urls", (req, res) => {
   // const currentUserName = req.cookies["username"]
-  const randomUserID = req.cookies["user_id"] 
+  const randomUserID = req.session["user_id"] 
   const loggedInUser = users[randomUserID]
   const templateVars = {
     // username: currentUserName,
@@ -157,7 +154,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const userID = req.cookies.user_id
+  const userID = req.session.user_id
   console.log('request body', req.body["longURL"]);
   console.log('generate random string', generateRandomString());
   const shortURL = generateRandomString();
@@ -228,7 +225,7 @@ app.post('/login', (req, res) => {
   });
 
 app.post('/logout', (req, res) => {
-  req.clearCookie = null;
+  req.session = null;
   res.redirect('/login');
 });
 
