@@ -7,16 +7,35 @@ const { v4: uuid } = require('uuid');
 const bcrypt = require("bcryptjs")
 
 const cookieSession = require('cookie-session');
-const helpers = require("./helpers");
-const getUserByEmail = helpers.getUserByEmail;
-const generateRandomString = helpers.generateRandomString;
+// const helpers = require("./helpers");
+// const getUserByEmail = helpers.getUserByEmail;
+// const generateRandomString = helpers.generateRandomString;
 // const urlsForUser = helpers.urlsForUser;
 
-// function generateRandomString() {
-//   let x = uuid();
-//   return x.substring(0, 6);
-// }
+function generateRandomString() {
+  let x = uuid();
+  return x.substring(0, 6);
+}
 
+const getUserByEmail = (email, users) => {
+  for (const userID in users) {
+    const user = users[userID];
+    if (email === user.email) {
+      return user;
+    }
+  }
+  return null;
+};
+
+const urlsForUser = (id, urlDatabase) => {
+  const userUrls = {};
+  for (let shortUrl in urlDatabase) {
+    if (urlDatabase[shortUrl].userID === id) {
+      userUrls[shortUrl] = urlDatabase[shortUrl];
+    }
+  }
+  return userUrls
+}
 
 const urlDatabase = {
   b6UTxQ: {
@@ -43,6 +62,8 @@ const users = {
   }
 };
 
+
+
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
@@ -66,22 +87,38 @@ app.get('/login', (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const randomUserID = req.cookies["user_id"] 
-  const loggedInUser = users[randomUserID]
+  // const loggedInUser = users[randomUserID]
+  if (!randomUserID) {
+    return res.status(404).send(`<h1>'You must be logged in to access this function'</h1><a href ="/login">Back to Login</a>`)
+  }
   const templateVars = {
-    user: loggedInUser
+    user: loggedInUser[req.cookies.user_id]
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const randomUserID = req.cookies["user_id"] 
-  const loggedInUser = users[randomUserID]
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
-    user: loggedInUser
+  const user_id = req.session.user_id;
+  // checking if user is logged in 
+  if (!user_id) {
+    return res.status(400).send(`<h1>Please log in<h1> <a href ="/login">Back to Login</a>`);
+  }
+  // checking if short id is in url database
+  const user = users[user_id];
+  const shortCodeUrl = req.params.id;
+  if (!urlDatabase[shortCodeUrl]) {
+    return res.status(400).send(`<h1>URL doesn't exist<h1> <a href ="/urls">Back to Main Page</a>`);
+  }
+  // checking is user id matches logged in user
+  if (user_id !== urlDatabase[shortCodeUrl].userID) {
+    return res.status(400).send(`<h1>URL doesn't belong to this user<h1> <a href ="/urls">Back to Main Page</a>`);
+  }
+  const templateVars = {
+    id: shortCodeUrl,
+    longURL: urlDatabase[req.params.id].longURL,
+    user: user
   };
-  res.render("urls_show", templateVars)
+  res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
@@ -117,10 +154,11 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  const userID = req.cookies.user_id
   console.log('request body', req.body["longURL"]);
   console.log('generate random string', generateRandomString());
   const shortURL = generateRandomString();
-  const longURL = req.body.longURL 
+  let longURL = req.body.longURL 
     if (longURL.includes('http')) {  // this is ensuring clean redirection
       urlDatabase[shortURL] = req.body["longURL"];
     } else {
@@ -128,6 +166,12 @@ app.post("/urls", (req, res) => {
       urlDatabase[shortURL] = modifiedURL
     }  
   console.log('urlDatabase', urlDatabase);// Log the POST request body to the console
+  if (!longURL.includes("http")) {
+    longURL = http
+  };
+  urlDatabase[shortURL] = { longURL, userID };
+  console.log("url database check", urlDatabase);
+  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
 });
 

@@ -4,13 +4,26 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register</title>
+  <title>Registration Page</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+  integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+  crossorigin="anonymous"
+/>
 </head>
 <body>
-    <form action="/register" method="POST" placeholder="Register Here">
-    <input name="email" type="email" placeholder="email"/>
-    <input name="password" type="password" placeholder="password"/>
-    <button type="submit" class="btn btn-info">Register</button>
-    </form>
+  <header>
+    <%- include('partials/_header') %>
+  </header>
+  <div>
+      <form method="POST" action="/register">
+        <input type="email" name="email" placeholder="Please enter email"/>
+        <input type="password" name="password" placeholder="Please enter password"/>
+        <button type='submit' class='btn btn-primary' display='block'> Register </button>
+      </form>
+  </div>   
 </body>
 </html>

@@ -1,17 +1,17 @@
-function generateRandomString() {
-  let x = uuid();
-  return x.substring(0, 6);
-}
+// function generateRandomString() {
+//   let x = uuid();
+//   return x.substring(0, 6);
+// }
 
-const getUserByEmail = (email, users) => {
-  for (const userID in users) {
-    const user = users[userID];
-    if (email === user.email) {
-      return user;
-    }
-  }
-  return null;
-};
+// const getUserByEmail = (email, users) => {
+//   for (const userID in users) {
+//     const user = users[userID];
+//     if (email === user.email) {
+//       return user;
+//     }
+//   }
+//   return null;
+// };
 
 // const urlsForUser = (id, urlDatabase) => {
 //   const userUrls = {};

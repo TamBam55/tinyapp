@@ -19,21 +19,20 @@
         <a class="nav-item nav-link" href="/login" style="font-family: Georgia"></a>
         <a class="nav-item nav-link" href="/register" style="font-family: Georgia"></a>
       </div>
+      <% if(user) { %> 
+        <form method="POST" action="/logout">
+          <span> Logged in as: <%= user.email %></span>
+         <button type="submit" class="btn btn-primary">logout</button>
+        </form>
+      <% } else{ %>  
+        <div>
+          <a class="btn btn-info" href="/login">Login</a>
+          <a class="btn btn-info" href="/register">Register</a>
+        </div>
+      <% } %>
     </div>
 
-  <% if (user) {%>
-    <form class="form-inline" method="POST" action="/logout">
-      <a class="nav-item nav-link inline">Logged in as <%=user.email%></a>
-      <button type="submit" class="btn btn-outline-secondary">Logout</button>
-    </form>
-    <%} else {%>
-    <form method="GET" class="in-line" action="/login">
-      <input type="submit" value="Login">
-    </form>
-    <form  method="GET" class="form-inline" action="/register">
-      <input type="submit" value="Register">
-    </form>
-  <%}%>
+  
     
   </nav>
 </header>
