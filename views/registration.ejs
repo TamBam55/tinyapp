@@ -17,13 +17,31 @@
 <body>
   <header>
     <%- include('partials/_header') %>
+      
+        <h1 style="font-family: Georgia">Register</h1>
+        <div class="mb-3 row">
+        <form method="POST" action="/register">
+        <h4><label for="inputEmail" style="font-family: Georgia" class="col-sm-2 col-form-label">Email</label>
+        <div class="col-sm-10">
+          <input type="text" name="email" style="font-family: Georgia" placeholder="enter email">
+        </div>
+      </div>
+    </h4>
+      
+      <div class="mb-3 row">
+        <h4><label for="inputPassword" style="font-family: Georgia" class="col-sm-2 col-form-label">Password</label>
+        <div class="col-sm-10">
+          <input name="password" style="font-family: Georgia" type="text" placeholder="password" />
+        </div>
+      </div>
+    </h4>
+    <button style="font-family: Georgia" type="submit" class="btn btn-info">Login</button>
+  </form>
   </header>
-  <div>
-      <form method="POST" action="/register">
-        <input type="email" name="email" placeholder="Please enter email"/>
-        <input type="password" name="password" placeholder="Please enter password"/>
-        <button type='submit' class='btn btn-primary' display='block'> Register </button>
-      </form>
-  </div>   
 </body>
+
 </html>
+
+
+
+
