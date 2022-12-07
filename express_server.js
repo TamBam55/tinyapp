@@ -1,30 +1,33 @@
 const express = require("express");
-const morgan = require("morgan");
-const cookieParser = require(('cookie-parser'));
-const cookiesession = require('cookie-session');
-const bodyparser = require('body-parser');
+const morgan = require("morgan")
+const cookieParser = require(('cookie-parser'))
 const app = express();
 const PORT = 8080; // default port 8080
-// const bcryptjs = require('bcryptjs');
 const { v4: uuid } = require('uuid');
+const bcrypt = require("bcryptjs")
 
-function generateRandomString() {
-  let x = uuid();
-  return x.substring(0, 6);
-}
+const cookieSession = require('cookie-session');
+const helpers = require("./helpers");
+const getUserByEmail = helpers.getUserByEmail;
+const generateRandomString = helpers.generateRandomString;
+// const urlsForUser = helpers.urlsForUser;
+
+// function generateRandomString() {
+//   let x = uuid();
+//   return x.substring(0, 6);
+// }
+
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca/",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca/",
+    userID: "aJ48lW",
+  },
 };
-
-const getUserByEmail = (email, database) => {
-  for (const userID in database)
-    if (database[id].email === email) {
-      return database[id];
-    }
-    return undefined;
-}
 
 
 const users = {
@@ -42,24 +45,24 @@ const users = {
 
 app.set("view engine", "ejs");
 
-app.use
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser());
-// app.use(cookieSession ({
-//     name: 'session'
-//     keys: ['hello', 'myName', 'isTammy'],
-//   })
-// );
+app.use(cookieSession({
+  name: 'bangarang',
+  keys: ["rufio"]
+}))
 
 app.get("/register", (req, res) => {
   res.render("registration", req.body);
 });
 
-app.get('/login', (req, res) => (
-  res.render('login')
-))
+app.get('/login', (req, res) => {
+  const templateVars = {
+    user: users[req.cookies.user_id]
+  }
+  res.render('login', templateVars)
+});
 
 app.get("/urls/new", (req, res) => {
   const randomUserID = req.cookies["user_id"] 
@@ -146,7 +149,7 @@ app.post('/register', (req, res) => {
     return res.status(404).send('Error 404: Email or Password missing')
   }
   // if email already exists in system, send back a (400) response
-  if (getUserByEmail) {
+  if (newUser.users) {
     return res.render('registered');
   }
   //store only the user id into the session cookie
@@ -155,30 +158,30 @@ app.post('/register', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-  const email = req.body.email;
   const password = req.body.password;
-  const templateVars = {
-    user: email,
-    urls: urlDatabase
-  }
-  
   //using email find the user in global users object
-
-  //if no user found return (404)
-
-  //if user is found then check if req.body.password is === user.password
-
-  //if password fails return (404) 
+  templateVars = {
+    user: users[req.cookies.user_id]
+  };
   
-  //if password passes 
-res.render('urls_index', templateVars)
-res.cookie("user_id", email);
-res.redirect("/urls");
-});
+  const user = getUserByEmail(req.body.email, users);
+    if (!user) {
+      //if no user found return (404)
+      return res.status(404).send("This user does not exist");
+    }
+    //if password fails return (404) 
+    if (user && !bcrypt.compareSync(password, user.password)) {
+      return res.status(404).send("Password not found")
+    }
+    const user_id = user.id 
+
+    req.session.user_id = user_id;
+    res.redirect("/urls");
+  });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect('/urls');
+  req.session = null;
+  res.redirect('/login');
 });
 
 app.post("/urls/:id/edit", (req, res) => {
@@ -199,3 +202,4 @@ app.post("/urls/:id/delete", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+

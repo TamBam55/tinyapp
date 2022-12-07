@@ -1,6 +1,6 @@
 <header>
   <nav class="navbar navbar-expand-md navbar-light bg-primary">
-    <a class="navbar-brand" href="/urls" style="font-family: Georgia">Tammy's TinyApp</a>
+    <a class="navbar-brand" href="/urls" style="font-family: Georgia">TinyApp</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -21,19 +21,19 @@
       </div>
     </div>
 
-    <% if (user) {%>
-      <form class="form-inline" method="POST" action="/logout">
-        <a class="nav-item nav-link inline">Logged in as <%=user.email%></a>
-        <button type="submit" class="btn btn-outline-secondary">Logout</button>
-      </form>
-      <%} else {%>
-
-    <form  method="POST" class="form-inline" action="/login">
-    <input type="text" name="email" placeholder="email">
-    <input name="password" type="text" placeholder="Password"/>
-    <input type="submit" value="Login">
+  <% if (user) {%>
+    <form class="form-inline" method="POST" action="/logout">
+      <a class="nav-item nav-link inline">Logged in as <%=user.email%></a>
+      <button type="submit" class="btn btn-outline-secondary">Logout</button>
     </form>
-    <%}%>
+    <%} else {%>
+    <form method="GET" class="in-line" action="/login">
+      <input type="submit" value="Login">
+    </form>
+    <form  method="GET" class="form-inline" action="/register">
+      <input type="submit" value="Register">
+    </form>
+  <%}%>
     
   </nav>
 </header>
