@@ -8,7 +8,7 @@
       data-target="#navbarNavAltMarkup"
       aria-controls="navbarNavAltMarkup"
       aria-expanded="false"
-      aria-label="Toggle navigation"
+      aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -21,8 +21,8 @@
       </div>
       <% if(user) { %> 
         <form method="POST" action="/logout">
-          <span> Logged in as: <%= user.email %></span>
-         <button type="submit" class="btn btn-primary">logout</button>
+          <span> Logged in as: <%= user.email %> </span>
+         <button style="font-family: Georgia" type="submit" class="btn btn-dark">Logout</button>
         </form>
       <% } else{ %>  
         <div>
