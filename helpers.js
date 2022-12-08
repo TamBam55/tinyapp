@@ -20,8 +20,8 @@ const urlsForUser = (id, urlDatabase) => {
       userUrls[shortUrl] = urlDatabase[shortUrl];
     }
   }
-  return userUrls
-}
+  return userUrls;
+};
 
 module.exports = { getUserByEmail, generateRandomString, urlsForUser }
 
