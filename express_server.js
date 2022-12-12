@@ -11,31 +11,6 @@ const generateRandomString = helpers.generateRandomString;
 const urlsForUser = helpers.urlsForUser;
 const database = require("./database")
 
-// function generateRandomString() {
-//   let x = uuid();
-//   return x.substring(0, 6);
-// }
-
-// const getUserByEmail = (email, users) => {
-//   for (const userID in users) {
-//     const user = users[userID];
-//     if (email === user.email) {
-//       return user;
-//     }
-//   }
-//   return null;
-// };
-
-// const urlsForUser = (id, urlDatabase) => {
-//   const userUrls = {};
-//   for (let shortUrl in urlDatabase) {
-//     if (urlDatabase[shortUrl].userID === id) {
-//       userUrls[shortUrl] = urlDatabase[shortUrl];
-//     }
-//   }
-//   return userUrls;
-// };
-
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -131,8 +106,6 @@ app.get("/hello", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
-  console.log('request body', req.body["longURL"]);
-  console.log('generate random string', generateRandomString());
   const shortURL = generateRandomString();
   let longURL = req.body.longURL;
   if (longURL.includes('http')) {  // this is ensuring clean redirection
@@ -141,12 +114,10 @@ app.post("/urls", (req, res) => {
     const modifiedURL = `http://${longURL}`;
     urlDatabase[shortURL] = modifiedURL;
   }
-  console.log('urlDatabase', urlDatabase);// Log the POST request body to the console
   if (!longURL.includes("http")) {
     longURL = http;
   };
   urlDatabase[shortURL] = { longURL, userID };
-  console.log("url database check", urlDatabase);
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
 });
