@@ -9,13 +9,36 @@ const helpers = require("./helpers");
 const getUserByEmail = helpers.getUserByEmail;
 const generateRandomString = helpers.generateRandomString;
 const urlsForUser = helpers.urlsForUser;
-const database = require("./database")
 
+
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca/",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca/",
+    userID: "aJ48lW",
+  },
+};
+
+
+const users = {
+  abc: {
+    id: 'abc',
+    email: 'a@a.com',
+    password: bcrypt.hashSync('1235', 10)
+  },
+  def: {
+    id: 'def',
+    email: 'tambam@mail.com',
+    password: bcrypt.hashSync('7895', 10)
+  }
+};
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-// app.use(cookieParser());
 app.use(cookieSession({
   name: 'bangarang',
   keys: ["rufio"]
@@ -86,7 +109,7 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     // username: currentUserName,
     user: loggedInUser,
-    // ... any other vars
+    // ... any other variables
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -115,11 +138,16 @@ app.post("/urls", (req, res) => {
     urlDatabase[shortURL] = modifiedURL;
   }
   if (!longURL.includes("http")) {
-    longURL = http;
+    longURL = 'http://' + longURL;
   };
   urlDatabase[shortURL] = { longURL, userID };
+
+  if (newUser === '') {
+    return res.status(404).send('Error 404: Email or Password missing')
+  
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${shortURL}`); // redirecting user with interpilated 
+}
 });
 
 app.post('/register', (req, res) => {
@@ -141,20 +169,17 @@ app.post('/register', (req, res) => {
   }
   // if email already exists in system, send back a (400) response
   if (newUser.users) {
-    return res.render('registered');
+    return res.status(404).send('Email already registered');
   }
   users[newUserID] = newUser;
   //store only the user id into the session cookie
   res.cookie("user_id", newUserID);
-  res.redirect("/urls");
+  res.redirect("/register");
 });
 
 app.post('/login', (req, res) => {
   const password = req.body.password;
   //using email find the user in global users object
-  // templateVars = {
-  //   user: users[req.cookies.user_id]
-  // };
   console.log(req.body);
   const user = getUserByEmail(req.body.email, users);
   if (!user) {

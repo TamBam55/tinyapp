@@ -1,3 +1,5 @@
+const { v4: uuid } = require('uuid');
+
 function generateRandomString() {
   let x = uuid();
   return x.substring(0, 6);
