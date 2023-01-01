@@ -61,6 +61,9 @@ app.get('/login', (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const randomUserID = req.session["user_id"];
+  if (!req.session.user_id) {
+    return res.status(401).send('Error 401: Unauthorized');
+  }
   // const loggedInUser = users[randomUserID]
   if (!randomUserID) {
     return res.status(404).send(`<h1>'You must be logged in to access this function'</h1><a href ="/login">Back to Login</a>`);
@@ -116,7 +119,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -131,6 +134,9 @@ app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = generateRandomString();
   let longURL = req.body.longURL;
+  if (!req.session.user_id) {
+    return res.status(401).send("Error 401: Unauthorized");
+  }
   if (longURL.includes('http')) {  // this is ensuring clean redirection
     urlDatabase[shortURL] = req.body["longURL"];
   } else {
@@ -162,19 +168,28 @@ app.post('/register', (req, res) => {
   //add the new user into the global users object
   console.log('Before', users);
 
+  // check if email already exists in users object
+  let emailExists = false;
+  for (const userID in users) {
+    if (users[userID].email === newUser.email) {
+      emailExists = true;
+      break;
+    }
+  }
+
+  if (emailExists) {
+    return res.status(400).send('Email already registered');
+  }
+
   console.log('After', users);
   // if email or password are empty, send back (400) response code
   if (newUser === '') {
     return res.status(404).send('Error 404: Email or Password missing');
   }
-  // if email already exists in system, send back a (400) response
-  if (newUser.users) {
-    return res.status(404).send('Email already registered');
-  }
   users[newUserID] = newUser;
   //store only the user id into the session cookie
   res.cookie("user_id", newUserID);
-  res.redirect("/register");
+  res.redirect("/urls");
 });
 
 app.post('/login', (req, res) => {
@@ -202,6 +217,9 @@ app.post('/logout', (req, res) => {
 });
 
 app.post("/urls/:id/edit", (req, res) => {
+  if (!req.session.user_id || req.session.user_id !== urlDatabase[req.params.id].userID) {
+    return res.status(401).send('Error 401: Unauthorized');
+  }
   console.log('request body', req.body["longURL"]);
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
@@ -209,6 +227,9 @@ app.post("/urls/:id/edit", (req, res) => {
 
 
 app.post("/urls/:id/delete", (req, res) => {
+  if (!req.session.user_id || req.session.user_id !== urlDatabase[req.params.id].userID) {
+    return res.status(401).send('Error 401: Unauthorized');
+  }
   console.log(req.params.id);
   const id = req.params.id;
   delete urlDatabase[id];
