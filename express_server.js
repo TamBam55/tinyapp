@@ -5,10 +5,7 @@ const PORT = 8080; // default port 8080
 const { v4: uuid } = require("uuid");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
-const helpers = require("./helpers");
-const getUserByEmail = helpers.getUserByEmail;
-const generateRandomString = helpers.generateRandomString;
-const urlsForUser = helpers.urlsForUser;
+const { getUserByEmail, generateRandomString, urlsForUser } = require("./helpers");
 
 const urlDatabase = {
   b6UTxQ: {
