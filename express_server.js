@@ -42,6 +42,12 @@ app.use(
 );
 
 app.get("/register", (req, res) => {
+  const user_id = req.session.user_id;
+
+  // check if user is logged in
+  if (user_id) {
+    return res.redirect("/urls")
+  }
   const templateVars = {
     user: null,
   };
@@ -49,6 +55,12 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  const user_id = req.session.user_id;
+
+  // check if user is logged in
+  if (user_id) {
+    return res.redirect("/urls")
+  }
   const templateVars = {
     user: users[req.session.user_id],
   };
@@ -62,14 +74,10 @@ app.get("/urls/new", (req, res) => {
   }
   // const loggedInUser = users[randomUserID]
   if (!randomUserID) {
-    return res
-      .status(404)
-      .send(
-        `<h1>'You must be logged in to access this function'</h1><a href ="/login">Back to Login</a>`
-      );
+    return res.redirect("/login")
   }
   const templateVars = {
-    user: randomUserID[req.session.user_id],
+    user: users[req.session.user_id],
   };
   res.render("urls_new", templateVars);
 });
@@ -109,7 +117,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+  res.redirect(longURL.longURL);
 });
 
 app.get("/urls", (req, res) => {
@@ -136,7 +144,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/", (req, res) => {
   if (!req.session.userID) {
-    res.redirect("/login");
+    res.redirect("/urls");
     return;
   }
 });
@@ -173,7 +181,6 @@ app.post("/urls", (req, res) => {
   });
 
 app.post("/register", (req, res) => {
-  console.log("req.body", req.body);
   const newUserID = generateRandomString();
   //create a new user object with id - email - password
   const newUser = {
@@ -181,8 +188,6 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10),
   };
-  //add the new user into the global users object
-  console.log("Before", users);
 
   // check if email already exists in users object
   let emailExists = false;
@@ -202,7 +207,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Error: Email or password cannot be empty");
   }
 
-  console.log("After", users);
+  
   users[newUserID] = newUser;
   // log the user in by setting their user ID in the session
   req.session.user_id = newUserID;
@@ -214,8 +219,6 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   const password = req.body.password;
-  //using email find the user in global users object
-  console.log(req.body);
   const user = getUserByEmail(req.body.email, users);
   if (!user) {
     //if no user found return (404)
@@ -226,7 +229,6 @@ app.post("/login", (req, res) => {
     return res.status(404).send("Password not found");
   }
   const user_id = user.id;
-  res.cookie("user_id", user_id);
   req.session.user_id = user_id;
   res.redirect("/urls");
 });
@@ -243,8 +245,7 @@ app.post("/urls/:id/edit", (req, res) => {
   ) {
     return res.status(401).send("Error 401: Unauthorized");
   }
-  console.log("request body", req.body["longURL"]);
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -255,10 +256,9 @@ app.post("/urls/:id/delete", (req, res) => {
   ) {
     return res.status(401).send("Error 401: Unauthorized");
   }
-  console.log(req.params.id);
+  
   const id = req.params.id;
   delete urlDatabase[id];
-  console.log(urlDatabase[id]);
   res.redirect("/urls");
 });
 

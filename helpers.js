@@ -17,7 +17,7 @@ const getUserByEmail = (email, users) => {
 
 const urlsForUser = (id, urlDatabase) => {
   const userUrls = {};
-  for (let shortUrl in urlDatabase) {
+  for (const shortUrl in urlDatabase) {
     if (urlDatabase[shortUrl].userID === id) {
       userUrls[shortUrl] = urlDatabase[shortUrl];
     }
